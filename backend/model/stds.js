@@ -1,6 +1,7 @@
 // Defining the schema of documents
 var mongoose = require('mongoose');
-var studentsSchema = new mongoose.Schema({
+const bcrypt = require('bcrypt');
+const studentsSchema = new mongoose.Schema({
   name:{
     type:String,
     required:true
@@ -17,28 +18,20 @@ password:{
     type:String,
     required:true
 }
- /* name: {
-    type:String,
-    required:true,
-    unique:true,
-    minlength:3
-  },
-  email:{
-    type:String,
-    required:true
-  },
-  contact:{
-    type:Number,
-    required:true,
-    unique:true
-  },
-  is_deleted:{
-    type:Boolean
-  }*/ 
+
+});
+studentsSchema.pre('save',async function(next){
+  if(this.isModified('password')){
+    this.password = await bcrypt.hash(this.password,10);
+  }else{
+    next();
+  }
+
 });
  // mongoose.model('Blogs',studentsSchema);
  // here we create collection named as student
 const student = new mongoose.model('Student', studentsSchema);
+
 module.exports = student;
 
 // inserting documents fields values

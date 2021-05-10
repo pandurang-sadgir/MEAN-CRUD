@@ -2,6 +2,7 @@ var createError = require('http-errors');
 var express = require('express');
 var dbc = require('./model/dbc');
 var stdschema = require('./model/stds');
+const bcrypt = require('bcrypt');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');

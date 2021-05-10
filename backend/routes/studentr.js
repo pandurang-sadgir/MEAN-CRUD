@@ -2,9 +2,11 @@ const { json } = require('body-parser');
 var express = require('express');
 var router = express.Router();
 var student = require('../model/stds');
-    mongoose = require('mongoose'), //mongo connection
-    bodyParser = require('body-parser'), //parses information from POST
-    methodOverride = require('method-override'); //used to manipulate POST
+const bcrypt = require('bcrypt');
+   // mongoose = require('mongoose'), //mongo connection
+   // bodyParser = require('body-parser'), //parses information from POST
+   // methodOverride = require('method-override'); //used to manipulate POST
+   
  router.use(express.json());
 /* GET users listing. */
 router.get('/', function(req, res, next) {
@@ -62,7 +64,9 @@ router.patch('/update/:id', async(req,res) =>{
   try {
     const _id = req.params.id;
    const updatedata = await student.findByIdAndUpdate(_id,req.body,{new:true}); //syntax {id,update_data,options}
-    res.send(updatedata);
+   const Student = new student(updatedata);
+   const newupdate =  await Student.save();
+    res.send(newupdate);
   } catch (error) {
     res.send(error);
   }
@@ -80,5 +84,28 @@ router.delete('/delete/:id', async(req,res) =>{
     res.send(error);
   }
 
+});
+
+router.post('/login',async(req,res)=>{
+  try {
+    if(req.body.email != null && req.body.password != null ){
+      const email = req.body.email;
+    const password = req.body.password;
+    const useremail =  await student.findOne({email:email}); // checking db email with user email
+    const ismatch = await bcrypt.compare(password,useremail.password); // user entered pw and db pw
+    //console.log(useremail);
+    if(ismatch){
+      res.status(200).send(useremail);
+
+    }else{
+      res.json({ack:'Invalid login details'});
+    }
+    }else{
+      res.json({ack:'Invalid login details'});
+    }
+
+  } catch (error) {
+    res.status(400).send(error);
+  }
 });
 module.exports = router;
